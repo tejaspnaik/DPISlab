@@ -12,7 +12,7 @@ pt = AES.new(key, AES.MODE_EAX, nonce=nonce).decrypt_and_verify(ct, tag)
 print(pt.decode())
 
 
-#these are separate
+
 #Key exchange algos
 
 from Crypto.PublicKey import RSA
