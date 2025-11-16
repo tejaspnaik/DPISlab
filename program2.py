@@ -1,4 +1,4 @@
-AES
+#AES
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 
@@ -12,7 +12,8 @@ pt = AES.new(key, AES.MODE_EAX, nonce=nonce).decrypt_and_verify(ct, tag)
 print(pt.decode())
 
 
-Key exchange algos
+#these are separate
+#Key exchange algos
 
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
