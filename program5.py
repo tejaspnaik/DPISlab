@@ -1,5 +1,5 @@
-Eavesdrop Proxy (C → Attacker → Server)
-
+#Eavesdrop Proxy (C → Attacker → Server)
+#run this code after running server and client(run this third)
 import socket
 
 L, S = ("127.0.0.1", 9000), ("127.0.0.1", 9001)
@@ -21,7 +21,7 @@ with socket.socket() as ls:
         c.sendall(r)
 
 
-Server
+#Server(run this first)
 import socket
 
 H, P = "127.0.0.1", 9001
@@ -33,7 +33,7 @@ with socket.socket() as s:
         print("Server got:", d.decode(errors="replace"))
         c.sendall(b"Server->Client: ACK")
 
-Client code
+#Client code(run this second)
 import socket
 
 HOST, PORT = "127.0.0.1", 9000  # connect to proxy/attacker
