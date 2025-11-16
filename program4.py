@@ -6,6 +6,7 @@
 #it will generate 2 .pem files
 #in same directory as the 2 files create server.py and client.py given below
 #run server.py first then client .py thats it
+
 #server.py
 import socket, ssl
 
