@@ -1,7 +1,7 @@
 
-ARP-poisoning/sniffing attack
+#ARP-poisoning/sniffing attack
 
-server
+#server.py(run first)
 
 import socket
 from collections import defaultdict
@@ -30,7 +30,7 @@ with socket.socket() as s:
             else:
                 c.sendall(b"ECHO")
 
-client
+#client(run second)
 
 # client_min.py
 import socket, time
