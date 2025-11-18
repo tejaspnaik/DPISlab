@@ -2,19 +2,38 @@
 import socket, random
 
 L, S = ("127.0.0.1", 9000), ("127.0.0.1", 9001)
+BUF = 4096
 
-with socket.socket() as ls:
-    ls.bind(L); ls.listen(1)
-    c, _ = ls.accept()
-    with c, socket.socket() as s:
-        s.connect(S)
+ls = socket.socket()
+ls.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+ls.bind(L)
+ls.listen(1)
+print("[Attacker-MITM] listening on", L, "forward to", S)
 
-        d = c.recv(4096)
-        t = d.decode(errors="replace")
-        t2 = t.replace("42", str(random.randint(10,99)))
-        s.sendall(t2.encode())
+c, addr = ls.accept()
+print("[Attacker] client connected", addr)
 
-        r = s.recv(4096)
+s = socket.socket()
+s.connect(S)
+
+d = c.recv(BUF)
+if d:
+    t = d.decode(errors="replace")
+    print("[Attacker] captured (C->S):", t)
+    newval = str(random.randint(10, 99))
+    t2 = t.replace("42", newval)
+    print("[Attacker] tampered ->", t2)
+    s.sendall(t2.encode())
+    r = s.recv(BUF)
+    print("[Attacker] captured (S->C):", r.decode(errors="replace"))
+    c.sendall(r)
+else:
+    print("[Attacker] no data from client")
+
+s.close()
+c.close()
+ls.close()
+print("[Attacker] done")
 
 
 #Server(run this first)
