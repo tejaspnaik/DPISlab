@@ -18,18 +18,26 @@ with socket.socket() as ls:
 
 
 #Server(run this first)
+# Server (run first)
 import socket
 
 H, P = "127.0.0.1", 9001
 with socket.socket() as s:
     s.bind((H, P)); s.listen(1)
-    c, _ = s.accept()
+    print("[Server] listening on", (H, P))
+    c, addr = s.accept()
     with c:
+        print("[Server] connection from", addr)
         d = c.recv(4096)
-        print("Server got:", d.decode(errors="replace"))
-        c.sendall(b"Server->Client: ACK")
+        if not d:
+            print("[Server] no data")
+        else:
+            print("[Server] received:", d.decode(errors="replace"))
+            c.sendall(b"Server->Client: ACK")
+            print("[Server] sent ACK")
 
 #Client code(run this second)
+# Client (run third, after starting proxy)
 import socket
 
 HOST, PORT = "127.0.0.1", 9000  # connect to proxy/attacker
@@ -37,6 +45,10 @@ MSG = "Client->Server: exam answer: 42"
 
 with socket.socket() as s:
     s.connect((HOST, PORT))
+    print("[Client] sending:", MSG)
     s.sendall(MSG.encode())
     r = s.recv(4096)
-    print("Client got:", r.decode(errors="replace"))
+    if r:
+        print("[Client] got reply:", r.decode(errors="replace"))
+    else:
+        print("[Client] no reply")
