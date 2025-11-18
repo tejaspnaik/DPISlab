@@ -1,8 +1,8 @@
 #Dictionary Attack (run this third)
 import hashlib
 
-def h(p, s): 
-    return hashlib.sha256((s+p).encode()).hexdigest()
+def h(p, s):
+    return hashlib.sha256((s + p).encode()).hexdigest()
 
 users = {
     "alice": ("S1", h("apple123", "S1")),
@@ -10,11 +10,20 @@ users = {
     "carol": ("ZZ", h("letmein", "ZZ")),
 }
 
-dict_words = ["password","123456","qwerty","apple123","letmein"]
+print("Stored (salt,hash) samples (truncated):")
+for u, (s, hs) in users.items():
+    print(" ", u, s, hs[:12] + "...")
 
+dict_words = ["password", "123456", "qwerty", "apple123", "letmein"]
+
+print("\nAttacker tries small dictionary...")
 for u, (s, stored) in users.items():
     hit = next((w for w in dict_words if h(w, s) == stored), None)
-    print(u, "->", hit if hit else "NOT cracked")
+    if hit:
+        print("[ATTACKER] Cracked", u, "->", hit)
+    else:
+        print("[ATTACKER] NOT cracked", u)
+
 
 
 
