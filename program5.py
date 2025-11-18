@@ -1,24 +1,39 @@
 #Eavesdrop Proxy (C → Attacker → Server)
 #run this code after running server and client(run this third)
+#!/usr/bin/env python3
+#!/usr/bin/env python3
 import socket
 
 L, S = ("127.0.0.1", 9000), ("127.0.0.1", 9001)
+BUF = 4096
 
-with socket.socket() as ls:
-    ls.bind(L)
-    ls.listen(1)
-    c, _ = ls.accept()
+ls = socket.socket()
+ls.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+ls.bind(L)
+ls.listen(1)
+print("[Attacker-EAVESDROP] listening on", L, "forward to", S)
 
-    with c, socket.socket() as s:
-        s.connect(S)
+c, addr = ls.accept()
+print("[Attacker] client connected", addr)
 
-        d = c.recv(4096)
-        print("[EAVESDROP C->S]", d.decode(errors="replace"))
-        s.sendall(d)
+s = socket.socket()
+s.connect(S)
 
-        r = s.recv(4096)
-        print("[EAVESDROP S->C]", r.decode(errors="replace"))
-        c.sendall(r)
+d = c.recv(BUF)
+if d:
+    txt = d.decode(errors="replace")
+    print("[Attacker] captured (C->S):", txt)
+    s.sendall(d)
+    r = s.recv(BUF)
+    print("[Attacker] captured (S->C):", r.decode(errors="replace"))
+    c.sendall(r)
+else:
+    print("[Attacker] no data from client")
+
+s.close()
+c.close()
+ls.close()
+print("[Attacker] done")
 
 
 #Server(run this first)
