@@ -1,4 +1,5 @@
-#MITM tampering (run this third)
+
+# MITM tampering (run this second)
 import socket, random
 
 L, S = ("127.0.0.1", 9000), ("127.0.0.1", 9001)
@@ -36,38 +37,45 @@ ls.close()
 print("[Attacker] done")
 
 
-#Server(run this first)
-# Server (run first)
+# Server (run this first)
 import socket
 
 H, P = "127.0.0.1", 9001
-with socket.socket() as s:
-    s.bind((H, P)); s.listen(1)
-    print("[Server] listening on", (H, P))
-    c, addr = s.accept()
-    with c:
-        print("[Server] connection from", addr)
-        d = c.recv(4096)
-        if not d:
-            print("[Server] no data")
-        else:
-            print("[Server] received:", d.decode(errors="replace"))
-            c.sendall(b"Server->Client: ACK")
-            print("[Server] sent ACK")
 
-#Client code(run this second)
-# Client (run third, after starting proxy)
+s = socket.socket()
+s.bind((H, P))
+s.listen(1)
+print("[Server] listening on", (H, P))
+
+c, addr = s.accept()
+print("[Server] connection from", addr)
+
+d = c.recv(4096)
+if not d:
+    print("[Server] no data")
+else:
+    print("[Server] received:", d.decode(errors="replace"))
+    c.sendall(b"Server->Client: ACK")
+    print("[Server] sent ACK")
+
+c.close()
+s.close()
+
+
+
+# Client (run this third, after starting proxy)
 import socket
 
 HOST, PORT = "127.0.0.1", 9000  # connect to proxy/attacker
 MSG = "Client->Server: exam answer: 42"
 
-with socket.socket() as s:
-    s.connect((HOST, PORT))
-    print("[Client] sending:", MSG)
-    s.sendall(MSG.encode())
-    r = s.recv(4096)
-    if r:
-        print("[Client] got reply:", r.decode(errors="replace"))
-    else:
-        print("[Client] no reply")
+s = socket.socket()
+s.connect((HOST, PORT))
+print("[Client] sending:", MSG)
+s.sendall(MSG.encode())
+r = s.recv(4096)
+if r:
+    print("[Client] got reply:", r.decode(errors="replace"))
+else:
+    print("[Client] no reply")
+s.close()
