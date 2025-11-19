@@ -1,8 +1,5 @@
-
 #ARP-poisoning/sniffing attack
-
 #server.py(run first)
-# server_short.py
 # server_ultra.py
 import socket
 from collections import defaultdict
@@ -34,9 +31,6 @@ while True:
 print("[S] server stopped")
 
 #client(run second)
-
-# client_min.py
-# client_short.py
 # client_ultra.py
 import socket,time
 
