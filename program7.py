@@ -1,37 +1,61 @@
 #run the files in this manner:Server (9001) → Attacker/Proxy (9000) → Client
 # MITM tampering (run this second)
 # proxy.py  (short & simple MITM)
-import socket, random
+# attacker_mitm.py — MITM that modifies "42" → random number
+import socket
+import random
 
-L, S = ("127.0.0.1", 9000), ("127.0.0.1", 9001)
+L = ("127.0.0.1", 9000)   # client → attacker (listen here)
+S = ("127.0.0.1", 9001)   # attacker → server (forward here)
 BUF = 4096
 
-ls = socket.socket()
-ls.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-ls.bind(L); ls.listen(1)
-print("[Attacker-MITM] listening on", L, "forward to", S)
+# Listen for client
+listener = socket.socket()
+listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+listener.bind(L)
+listener.listen(1)
 
-c, addr = ls.accept()
-print("[Attacker] client connected", addr)
+print(f"[MITM] Listening on {L}, forwarding to {S}")
 
-s = socket.socket()
-s.connect(S)
+# Accept client
+client_sock, client_addr = listener.accept()
+print(f"[MITM] Client connected: {client_addr}")
 
-d = c.recv(BUF)
-if not d:
-    print("[Attacker] no data from client")
+# Connect to server
+server_sock = socket.socket()
+server_sock.connect(S)
+
+# Receive from client
+data = client_sock.recv(BUF)
+if not data:
+    print("[MITM] No data from client")
 else:
-    t = d.decode(errors="replace")
-    print("[Attacker] captured (C->S):", t)
-    t2 = t.replace("42", str(random.randint(10, 99)))
-    print("[Attacker] tampered ->", t2)
-    s.sendall(t2.encode())
-    r = s.recv(BUF)
-    print("[Attacker] captured (S->C):", r.decode(errors="replace"))
-    c.sendall(r)
+    original = data.decode(errors="replace")
+    print("[MITM] Captured (Client → Server):", original)
 
-s.close(); c.close(); ls.close()
-print("[Attacker] done")
+    # Tamper: replace "42" with random 2-digit number
+    new_value = str(random.randint(10, 99))
+    tampered = original.replace("42", new_value)
+
+    print("[MITM] Tampered message:", tampered)
+
+    # Forward tampered message to server
+    server_sock.sendall(tampered.encode())
+
+    # Receive server reply
+    reply = server_sock.recv(BUF)
+    print("[MITM] Captured (Server → Client):", reply.decode(errors="replace"))
+
+    # Send reply back to client
+    client_sock.sendall(reply)
+
+# Cleanup
+server_sock.close()
+client_sock.close()
+listener.close()
+
+print("[MITM] Done")
+
 
 
 # Server (run this first)
