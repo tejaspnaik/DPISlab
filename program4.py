@@ -33,25 +33,23 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
 
 #client.py
 
+# client_secure_verify.py
 import socket, ssl
 
-HOST = "127.0.0.1"
-PORT = 4443
+HOST, PORT = "127.0.0.1", 4443
 
-context = ssl.create_default_context()
-context.check_hostname = False
-context.verify_mode = ssl.CERT_NONE  # minimalist lab mode
+# client loads cert.pem as trusted CA
+ctx = ssl.create_default_context(cafile="cert.pem")
+ctx.check_hostname = False   # optional for self-signed
+# NOTE: verify_mode is VERIFY_REQUIRED by default now
 
 with socket.create_connection((HOST, PORT)) as raw:
-    with context.wrap_socket(raw, server_hostname=HOST) as tls:
+    with ctx.wrap_socket(raw, server_hostname=HOST) as tls:
         print("TLS connection established!")
-        message = "Hello Secure World!"
-        print(f'Sending: "{message}"')
-        tls.sendall(message.encode())
-
-        reply = tls.recv(1024).decode()
-        print("Received from server:", reply)
-
+        msg = "Hello Secure World!"
+        print(f'Sending: "{msg}"')
+        tls.sendall(msg.encode())
+        print("Received from server:", tls.recv(1024).decode())
 
 
 
