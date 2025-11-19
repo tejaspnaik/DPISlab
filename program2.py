@@ -1,17 +1,3 @@
-#AES
-from Crypto.Cipher import AES
-from Crypto.Random import get_random_bytes
-
-key = get_random_bytes(16)
-cipher = AES.new(key, AES.MODE_EAX)
-
-nonce = cipher.nonce
-ct, tag = cipher.encrypt_and_digest(b"This is a secret message.")
-
-pt = AES.new(key, AES.MODE_EAX, nonce=nonce).decrypt_and_verify(ct, tag)
-print(pt.decode())
-
-
 
 #Key exchange algos
 
