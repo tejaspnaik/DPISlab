@@ -39,12 +39,12 @@ import socket, ssl
 HOST, PORT = "127.0.0.1", 4443
 
 # client loads cert.pem as trusted CA
-ctx = ssl.create_default_context(cafile="cert.pem")
-ctx.check_hostname = False   # optional for self-signed
+context = ssl.create_default_context(cafile="cert.pem")
+context.check_hostname = False   # optional for self-signed
 # NOTE: verify_mode is VERIFY_REQUIRED by default now
 
 with socket.create_connection((HOST, PORT)) as raw:
-    with ctx.wrap_socket(raw, server_hostname=HOST) as tls:
+    with context.wrap_socket(raw, server_hostname=HOST) as tls:
         print("TLS connection established!")
         msg = "Hello Secure World!"
         print(f'Sending: "{msg}"')
