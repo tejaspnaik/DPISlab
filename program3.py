@@ -14,6 +14,5 @@ sig = PKCS1_v1_5.new(key).sign(h)
 valid = PKCS1_v1_5.new(key.public_key()).verify(h, sig)
 
 print(h)
-#print("Hash:", h.hexdigest()) use if hash print is required
-print("Signature (hex):", sig.hex())
+print("Signature (hex):", sig)
 print("Is signature valid?", valid)
