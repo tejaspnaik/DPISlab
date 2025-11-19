@@ -4,32 +4,50 @@
 #!/usr/bin/env python3
 import socket
 
-L, S = ("127.0.0.1", 9000), ("127.0.0.1", 9001)
+# Proxy listens on L and forwards to real server S
+L = ("127.0.0.1", 9000)   # client → proxy
+S = ("127.0.0.1", 9001)   # proxy → server
 BUF = 4096
 
+# Listen for client
 ls = socket.socket()
 ls.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-ls.bind(L); ls.listen(1)
-print("[Attacker-EAVESDROP] listening on", L, "forward to", S)
+ls.bind(L)
+ls.listen(1)
 
-c, addr = ls.accept()
-print("[Attacker] client connected", addr)
+print(f"[Proxy] Listening on {L}, forwarding to {S}")
 
-s = socket.socket(); s.connect(S)
+# Accept client
+client_sock, client_addr = ls.accept()
+print(f"[Proxy] Client connected: {client_addr}")
 
-d = c.recv(BUF)
-if d:
-    txt = d.decode(errors="replace")
-    print("[Attacker] captured (C->S):", txt)
-    s.sendall(d)
-    r = s.recv(BUF)
-    print("[Attacker] captured (S->C):", r.decode(errors="replace"))
-    c.sendall(r)
+# Connect to server
+server_sock = socket.socket()
+server_sock.connect(S)
+
+# Receive from client
+data = client_sock.recv(BUF)
+if data:
+    print("[Proxy] Captured (Client → Server):", data.decode(errors="replace"))
+
+    # Forward to server
+    server_sock.sendall(data)
+
+    # Receive server reply
+    reply = server_sock.recv(BUF)
+    print("[Proxy] Captured (Server → Client):", reply.decode(errors="replace"))
+
+    # Send back to client
+    client_sock.sendall(reply)
 else:
-    print("[Attacker] no data")
+    print("[Proxy] No data received")
 
-s.close(); c.close(); ls.close()
-print("[Attacker] done")
+# Cleanup
+server_sock.close()
+client_sock.close()
+ls.close()
+print("[Proxy] Done")
+
 
 
 
