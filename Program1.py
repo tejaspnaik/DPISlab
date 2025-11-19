@@ -1,5 +1,4 @@
 #DES
-
 from Crypto.Cipher import DES
 from Crypto.Util.Padding import pad, unpad
 
@@ -11,5 +10,19 @@ pt = unpad(cipher.decrypt(ct), DES.block_size)
 
 print("encrypted text:",ct)
 print("plaintext:",pt)
+
+#AES
+from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
+
+key = get_random_bytes(16)
+cipher = AES.new(key, AES.MODE_EAX)
+
+nonce = cipher.nonce
+ct, tag = cipher.encrypt_and_digest(b"This is a secret message.")
+
+pt = AES.new(key, AES.MODE_EAX, nonce=nonce).decrypt_and_verify(ct, tag)
+print(pt.decode())
+
 
 
