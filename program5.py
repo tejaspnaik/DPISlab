@@ -1,5 +1,5 @@
 #Eavesdrop Proxy (C → Attacker → Server)
-#run this code after running server and client(run this third)
+#run this code after running server and client(run this second)
 #!/usr/bin/env python3
 #!/usr/bin/env python3
 import socket
@@ -9,15 +9,13 @@ BUF = 4096
 
 ls = socket.socket()
 ls.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-ls.bind(L)
-ls.listen(1)
+ls.bind(L); ls.listen(1)
 print("[Attacker-EAVESDROP] listening on", L, "forward to", S)
 
 c, addr = ls.accept()
 print("[Attacker] client connected", addr)
 
-s = socket.socket()
-s.connect(S)
+s = socket.socket(); s.connect(S)
 
 d = c.recv(BUF)
 if d:
@@ -28,12 +26,11 @@ if d:
     print("[Attacker] captured (S->C):", r.decode(errors="replace"))
     c.sendall(r)
 else:
-    print("[Attacker] no data from client")
+    print("[Attacker] no data")
 
-s.close()
-c.close()
-ls.close()
+s.close(); c.close(); ls.close()
 print("[Attacker] done")
+
 
 
 #Server(run this first)
@@ -54,12 +51,13 @@ with socket.socket() as s:
             print("[Server] received:", d.decode(errors="replace"))
             c.sendall(b"Server->Client: ACK")
             print("[Server] sent ACK")
+
             
 #Client code(run this second)
 # Client (run third, after starting proxy)
 import socket
 
-HOST, PORT = "127.0.0.1", 9000  # connect to proxy/attacker
+HOST, PORT = "127.0.0.1", 9000  # proxy
 MSG = "Client->Server: exam answer: 42"
 
 with socket.socket() as s:
