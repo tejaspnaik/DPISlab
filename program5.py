@@ -35,37 +35,46 @@ print("[Attacker] done")
 
 #Server(run this first)
 # Server (run first)
+# SERVER
 import socket
 
-H, P = "127.0.0.1", 9001
-with socket.socket() as s:
-    s.bind((H, P)); s.listen(1)
-    print("[Server] listening on", (H, P))
-    c, addr = s.accept()
-    with c:
-        print("[Server] connection from", addr)
-        d = c.recv(4096)
-        if not d:
-            print("[Server] no data")
-        else:
-            print("[Server] received:", d.decode(errors="replace"))
-            c.sendall(b"Server->Client: ACK")
-            print("[Server] sent ACK")
+HOST, PORT = "127.0.0.1", 9001
+
+s = socket.socket()
+s.bind((HOST, PORT))
+s.listen()
+
+print(f"[Server] Listening on {HOST}:{PORT}")
+conn, addr = s.accept()
+
+print(f"[Server] Connected by {addr}")
+data = conn.recv(4096)
+
+if data:
+    print("[Server] Received:", data.decode())
+    conn.sendall(b"ACK")
+else:
+    print("[Server] No data")
+
+conn.close()
+s.close()
 
             
 #Client code(run this second)
 # Client (run third, after starting proxy)
+# CLIENT
 import socket
 
-HOST, PORT = "127.0.0.1", 9000  # proxy
+HOST, PORT = "127.0.0.1", 9000
 MSG = "Client->Server: exam answer: 42"
 
-with socket.socket() as s:
-    s.connect((HOST, PORT))
-    print("[Client] sending:", MSG)
-    s.sendall(MSG.encode())
-    r = s.recv(4096)
-    if r:
-        print("[Client] got reply:", r.decode(errors="replace"))
-    else:
-        print("[Client] no reply")
+s = socket.socket()
+s.connect((HOST, PORT))
+
+print("[Client] Sending:", MSG)
+s.sendall(MSG.encode())
+
+reply = s.recv(4096)
+print("[Client] Reply:", reply.decode() if reply else "No reply")
+
+s.close()
